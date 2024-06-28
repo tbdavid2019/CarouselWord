@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>名言走馬燈</title>
+    <title>今日詩詞走馬燈</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -85,8 +85,8 @@
             <div class="author"></div>
         </div>
         <div class="controls">
-            <button id="prev">上一句</button>
-            <button id="next">下一句</button>
+            <button id="prev">上一首</button>
+            <button id="next">下一首</button>
         </div>
     </div>
     <script>
@@ -96,48 +96,51 @@
         const nextButton = document.getElementById('next');
         const quoteContainer = document.querySelector('.quote-container');
         
-        let quotes = [];
+        let poems = [];
         let currentIndex = 0;
 
-        async function fetchQuote() {
+        async function fetchPoem() {
             try {
-                const response = await fetch('https://v1.hitokoto.cn');
+                const response = await fetch('https://v2.jinrishici.com/one.json');
                 const data = await response.json();
-                return { text: data.hitokoto, author: data.from };
+                return { 
+                    text: data.data.content, 
+                    author: `${data.data.origin.dynasty} ${data.data.origin.author} 《${data.data.origin.title}》` 
+                };
             } catch (error) {
-                console.error('Error fetching quote:', error);
-                return { text: "無法獲取名言，請稍後再試。", author: "系統" };
+                console.error('Error fetching poem:', error);
+                return { text: "無法獲取詩詞，請稍後再試。", author: "系統" };
             }
         }
 
-        async function initializeQuotes() {
+        async function initializePoems() {
             for (let i = 0; i < 5; i++) {
-                const quote = await fetchQuote();
-                quotes.push(quote);
+                const poem = await fetchPoem();
+                poems.push(poem);
             }
-            displayQuote();
+            displayPoem();
             startAutoPlay();
         }
 
-        function displayQuote() {
-            const quote = quotes[currentIndex];
-            quoteElement.textContent = quote.text;
-            authorElement.textContent = `— ${quote.author}`;
+        function displayPoem() {
+            const poem = poems[currentIndex];
+            quoteElement.textContent = poem.text;
+            authorElement.textContent = poem.author;
             adjustFontSize();
         }
 
-        async function nextQuote() {
-            currentIndex = (currentIndex + 1) % quotes.length;
+        async function nextPoem() {
+            currentIndex = (currentIndex + 1) % poems.length;
             if (currentIndex === 0) {
-                // 當循環回到開始時，獲取一個新的名言
-                quotes[currentIndex] = await fetchQuote();
+                // 當循環回到開始時，獲取一首新的詩詞
+                poems[currentIndex] = await fetchPoem();
             }
-            displayQuote();
+            displayPoem();
         }
 
-        async function prevQuote() {
-            currentIndex = (currentIndex - 1 + quotes.length) % quotes.length;
-            displayQuote();
+        async function prevPoem() {
+            currentIndex = (currentIndex - 1 + poems.length) % poems.length;
+            displayPoem();
         }
 
         function adjustFontSize() {
@@ -153,14 +156,14 @@
         }
 
         function startAutoPlay() {
-            setInterval(nextQuote, 3000 + Math.random() * 2000);  // 3-5秒隨機間隔
+            setInterval(nextPoem, 3000 + Math.random() * 2000);  // 3-5秒隨機間隔
         }
 
         window.addEventListener('resize', adjustFontSize);
-        nextButton.addEventListener('click', nextQuote);
-        prevButton.addEventListener('click', prevQuote);
+        nextButton.addEventListener('click', nextPoem);
+        prevButton.addEventListener('click', prevPoem);
 
-        initializeQuotes();
+        initializePoems();
     </script>
 </body>
 </html>
