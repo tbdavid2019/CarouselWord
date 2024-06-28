@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今日詩詞走馬燈</title>
+    <title>名言走馬燈</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -85,8 +85,8 @@
             <div class="author"></div>
         </div>
         <div class="controls">
-            <button id="prev">上一首</button>
-            <button id="next">下一首</button>
+            <button id="prev">上一句</button>
+            <button id="next">下一句</button>
         </div>
     </div>
     <script>
@@ -96,51 +96,44 @@
         const nextButton = document.getElementById('next');
         const quoteContainer = document.querySelector('.quote-container');
         
-        let poems = [];
+        let quotes = [
+            { text: "生活中最棒的事情是：相信夢想。", author: "奧普拉·溫弗瑞" },
+            { text: "成功不是最終目標，失敗也不是致命的：重要的是繼續前進的勇氣。", author: "溫斯頓·邱吉爾" },
+            { text: "你必須做那些你認為不能做的事情。", author: "艾莉諾·羅斯福" },
+            { text: "機會只留給有準備的人。", author: "路易·巴斯德" },
+            { text: "最大的冒險是過你想要的生活。", author: "奧普拉·溫弗瑞" },
+            { text: "勝利總是屬於堅持到最後的人。", author: "拿破崙·波拿巴" },
+            { text: "每個人都有理想的生活。我所做的只是真實地生活。", author: "奧斯卡·王爾德" },
+            { text: "真正的智慧在於承認自己的無知。", author: "蘇格拉底" },
+            { text: "生命的價值不在於它的長度，而在於它的實際內容。", author: "塞涅卡" },
+            { text: "改變你的想法，你就改變了你的世界。", author: "諾曼·文森特·皮爾" }
+        ];
+        
         let currentIndex = 0;
 
-        async function fetchPoem() {
-            try {
-                const response = await fetch('https://v2.jinrishici.com/one.json');
-                const data = await response.json();
-                return { 
-                    text: data.data.content, 
-                    author: `${data.data.origin.dynasty} ${data.data.origin.author} 《${data.data.origin.title}》` 
-                };
-            } catch (error) {
-                console.error('Error fetching poem:', error);
-                return { text: "無法獲取詩詞，請稍後再試。", author: "系統" };
+        function shuffleQuotes() {
+            for (let i = quotes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
             }
+            quotes = quotes.slice(0, 5);  // 只保留前5個名言
         }
 
-        async function initializePoems() {
-            for (let i = 0; i < 5; i++) {
-                const poem = await fetchPoem();
-                poems.push(poem);
-            }
-            displayPoem();
-            startAutoPlay();
-        }
-
-        function displayPoem() {
-            const poem = poems[currentIndex];
-            quoteElement.textContent = poem.text;
-            authorElement.textContent = poem.author;
+        function displayQuote() {
+            const quote = quotes[currentIndex];
+            quoteElement.textContent = quote.text;
+            authorElement.textContent = `— ${quote.author}`;
             adjustFontSize();
         }
 
-        async function nextPoem() {
-            currentIndex = (currentIndex + 1) % poems.length;
-            if (currentIndex === 0) {
-                // 當循環回到開始時，獲取一首新的詩詞
-                poems[currentIndex] = await fetchPoem();
-            }
-            displayPoem();
+        function nextQuote() {
+            currentIndex = (currentIndex + 1) % quotes.length;
+            displayQuote();
         }
 
-        async function prevPoem() {
-            currentIndex = (currentIndex - 1 + poems.length) % poems.length;
-            displayPoem();
+        function prevQuote() {
+            currentIndex = (currentIndex - 1 + quotes.length) % quotes.length;
+            displayQuote();
         }
 
         function adjustFontSize() {
@@ -156,14 +149,16 @@
         }
 
         function startAutoPlay() {
-            setInterval(nextPoem, 3000 + Math.random() * 2000);  // 3-5秒隨機間隔
+            setInterval(nextQuote, 3000 + Math.random() * 2000);  // 3-5秒隨機間隔
         }
 
         window.addEventListener('resize', adjustFontSize);
-        nextButton.addEventListener('click', nextPoem);
-        prevButton.addEventListener('click', prevPoem);
+        nextButton.addEventListener('click', nextQuote);
+        prevButton.addEventListener('click', prevQuote);
 
-        initializePoems();
+        shuffleQuotes();
+        displayQuote();
+        startAutoPlay();
     </script>
 </body>
 </html>
